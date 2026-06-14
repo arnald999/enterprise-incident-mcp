@@ -1,58 +1,45 @@
-from enterprise_incident_mcp.models.incident import (
-    CreateIncidentRequest,
+from datetime import datetime, UTC
+from uuid import uuid4
+
+from enterprise_incident_mcp.domain.incidents.models import (
     Incident,
     IncidentStatus,
-    Severity,
-    UpdateIncidentRequest,
 )
-from enterprise_incident_mcp.repositories.incident_repository import IncidentRepository
+from enterprise_incident_mcp.domain.incidents.schemas import (
+    IncidentCreate,
+)
+from enterprise_incident_mcp.repositories.incident_repository import (
+    IncidentRepository,
+)
 
 
 class IncidentService:
-    def __init__(self, repository: IncidentRepository) -> None:
+
+    def __init__(self, repository: IncidentRepository):
         self.repository = repository
 
-    def list_incidents(
+    async def create_incident(
         self,
-        status: IncidentStatus | None = None,
-        severity: Severity | None = None,
-    ) -> list[Incident]:
-        return self.repository.list(status=status, severity=severity)
+        payload: IncidentCreate,
+    ):
 
-    def get_incident(self, incident_id: str) -> Incident:
-        incident = self.repository.get(incident_id)
-        if not incident:
-            raise ValueError(f"Incident not found: {incident_id}")
-        return incident
+        now = datetime.now(UTC)
 
-    def search_incidents(self, query: str) -> list[Incident]:
-        return self.repository.search(query)
-
-    def create_incident(self, request: CreateIncidentRequest) -> Incident:
-        next_id = f"INC-{100 + len(self.repository.list()) + 1}"
         incident = Incident(
-            id=next_id,
-            title=request.title,
-            description=request.description,
-            severity=request.severity,
-            owner=request.owner,
-            service=request.service,
+            id=f"INC-{uuid4().hex[:8]}",
+            title=payload.title,
+            description=payload.description,
+            severity=payload.severity,
+            status=IncidentStatus.OPEN,
+            owner=payload.owner,
+            service=payload.service,
+            created_at=now,
+            updated_at=now,
         )
-        return self.repository.create(incident)
 
-    def update_incident(self, request: UpdateIncidentRequest) -> Incident:
-        incident = self.repository.update(
-            incident_id=request.incident_id,
-            status=request.status,
-            severity=request.severity,
-            owner=request.owner,
+        return await self.repository.create(
+            incident
         )
-        if not incident:
-            raise ValueError(f"Incident not found: {request.incident_id}")
-        return incident
 
-    def assign_incident(self, incident_id: str, owner: str) -> Incident:
-        incident = self.repository.update(incident_id=incident_id, owner=owner)
-        if not incident:
-            raise ValueError(f"Incident not found: {incident_id}")
-        return incident
+    async def list_incidents(self):
+        return await self.repository.list_incidents()
