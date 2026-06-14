@@ -1,6 +1,15 @@
 services:
-  enterprise-incident-mcp:
-    build: .
-    container_name: enterprise-incident-mcp
-    env_file:
-      - .env.example
+  postgres:
+    image: postgres:16
+    container_name: enterprise-incident-postgres
+    environment:
+      POSTGRES_USER: incident_user
+      POSTGRES_PASSWORD: incident_password
+      POSTGRES_DB: incident_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
