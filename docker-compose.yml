@@ -1,0 +1,6 @@
+services:
+  enterprise-incident-mcp:
+    build: .
+    container_name: enterprise-incident-mcp
+    env_file:
+      - .env.example
