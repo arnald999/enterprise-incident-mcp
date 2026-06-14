@@ -2,11 +2,20 @@
 name = "enterprise-incident-mcp"
 version = "0.1.0"
 description = "Enterprise Incident MCP Server for AI-native incident management"
-requires-python = ">=3.12"
+requires-python = ">=3.13,<3.14"
 dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.136.3",
+    "httpx>=0.28.1",
     "mcp>=1.0.0",
+    "opentelemetry-api>=1.42.1",
+    "opentelemetry-sdk>=1.42.1",
     "pydantic>=2.8.0",
-    "python-dotenv>=1.0.1"
+    "pydantic-settings>=2.14.1",
+    "python-dotenv>=1.0.1",
+    "sqlalchemy>=2.0.50",
+    "structlog>=26.1.0",
 ]
 
 [project.optional-dependencies]
@@ -22,3 +31,11 @@ line-length = 100
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0",
+    "pytest>=9.1.0",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.17",
+]
