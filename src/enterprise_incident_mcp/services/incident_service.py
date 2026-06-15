@@ -12,6 +12,8 @@ from enterprise_incident_mcp.repositories.incident_event_repository import (
 from enterprise_incident_mcp.domain.incidents.models import Incident, IncidentStatus
 from enterprise_incident_mcp.domain.incidents.schemas import IncidentCreate
 from enterprise_incident_mcp.repositories.incident_repository import IncidentRepository
+from enterprise_incident_mcp.domain.incidents.exceptions import InvalidStatusTransition
+from enterprise_incident_mcp.domain.incidents.state_machine import is_valid_transition
 
 
 class IncidentService:
@@ -60,6 +62,15 @@ class IncidentService:
         severity: str | None = None,
         owner: str | None = None,
     ) -> Incident:
+        existing = await self.repository.get_by_id(incident_id)
+
+        if existing is None:
+            raise ValueError(f"Incident not found: {incident_id}")
+
+        if status is not None and status != existing.status:
+            if not is_valid_transition(existing.status, status):
+                raise InvalidStatusTransition(f"{existing.status} -> {status}")
+
         incident = await self.repository.update(
             incident_id=incident_id,
             status=status,
@@ -69,7 +80,7 @@ class IncidentService:
 
         if incident is None:
             raise ValueError(f"Incident not found: {incident_id}")
-        
+
         await self._record_event(
             incident_id=incident.id,
             event_type=IncidentEventType.INCIDENT_UPDATED,

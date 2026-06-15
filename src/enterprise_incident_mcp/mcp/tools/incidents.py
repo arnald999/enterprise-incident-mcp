@@ -5,6 +5,7 @@ from enterprise_incident_mcp.services.incident_service import IncidentService
 from enterprise_incident_mcp.repositories.incident_event_repository import (
     IncidentEventRepository,
 )
+from enterprise_incident_mcp.domain.incidents.exceptions import InvalidStatusTransition
 
 async def create_incident_tool(
     title: str,
@@ -115,6 +116,12 @@ async def update_incident_tool(
                 owner=owner,
             )
             return serialize_incident(incident)
+        except InvalidStatusTransition as exc:
+            return {
+                "error": "invalid_status_transition",
+                "message": str(exc),
+                "incident_id": incident_id,
+            }
         except ValueError:
             return {
                 "error": "incident_not_found",
