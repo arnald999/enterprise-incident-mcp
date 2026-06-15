@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from enterprise_incident_mcp.domain.incidents.models import Incident
+from datetime import datetime
 
 
 class IncidentRepository:
@@ -23,3 +24,32 @@ class IncidentRepository:
             select(Incident).where(Incident.id == incident_id)
         )
         return result.scalar_one_or_none()
+    
+    async def update(
+        self,
+        incident_id: str,
+        status: str | None = None,
+        severity: str | None = None,
+        owner: str | None = None,
+    ) -> Incident | None:
+        incident = await self.get_by_id(incident_id)
+
+        if incident is None:
+            return None
+
+        if status is not None:
+            incident.status = status
+
+        if severity is not None:
+            incident.severity = severity
+
+        if owner is not None:
+            incident.owner = owner
+
+        incident.updated_at = datetime.utcnow()
+
+        await self.session.commit()
+        await self.session.refresh(incident)
+
+        return incident
+    

@@ -3,8 +3,11 @@ from enterprise_incident_mcp.mcp.resources.system import (
     database_health,
 )
 from enterprise_incident_mcp.mcp.tools.incidents import (
+    assign_incident_tool,
     create_incident_tool,
+    get_incident_tool,
     list_incidents_tool,
+    update_incident_tool,
 )
 
 mcp = FastMCP("enterprise-incident-mcp")
@@ -45,6 +48,37 @@ async def create_incident(
 async def list_incidents() -> list[dict]:
     """List all incidents from PostgreSQL."""
     return await list_incidents_tool()
+
+
+@mcp.tool()
+async def get_incident(incident_id: str) -> dict:
+    """Get a single incident by ID from PostgreSQL."""
+    return await get_incident_tool(incident_id)
+
+
+@mcp.tool()
+async def update_incident(
+    incident_id: str,
+    status: str | None = None,
+    severity: str | None = None,
+    owner: str | None = None,
+) -> dict:
+    """Update incident status, severity, or owner."""
+    return await update_incident_tool(
+        incident_id=incident_id,
+        status=status,
+        severity=severity,
+        owner=owner,
+    )
+
+
+@mcp.tool()
+async def assign_incident(incident_id: str, owner: str) -> dict:
+    """Assign an incident to an owner or team."""
+    return await assign_incident_tool(
+        incident_id=incident_id,
+        owner=owner,
+    )
 
 
 if __name__ == "__main__":
