@@ -8,6 +8,7 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
     get_incident_tool,
     list_incidents_tool,
     update_incident_tool,
+    get_incident_timeline_tool,
 )
 
 mcp = FastMCP("enterprise-incident-mcp")
@@ -79,6 +80,12 @@ async def assign_incident(incident_id: str, owner: str) -> dict:
         incident_id=incident_id,
         owner=owner,
     )
+
+
+@mcp.tool()
+async def get_incident_timeline(incident_id: str) -> list[dict]:
+    """Get timeline events for an incident."""
+    return await get_incident_timeline_tool(incident_id)
 
 
 if __name__ == "__main__":

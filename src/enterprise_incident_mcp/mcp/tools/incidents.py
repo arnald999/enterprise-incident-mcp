@@ -142,3 +142,21 @@ async def assign_incident_tool(
                 "error": "incident_not_found",
                 "incident_id": incident_id,
             }
+        
+
+async def get_incident_timeline_tool(incident_id: str) -> list[dict]:
+    async with AsyncSessionLocal() as session:
+        event_repository = IncidentEventRepository(session)
+
+        events = await event_repository.get_timeline(incident_id)
+
+        return [
+            {
+                "id": event.id,
+                "incident_id": event.incident_id,
+                "event_type": event.event_type,
+                "message": event.message,
+                "created_at": event.created_at.isoformat(),
+            }
+            for event in events
+        ]
