@@ -10,6 +10,7 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
     update_incident_tool,
     get_incident_timeline_tool,
     search_incidents_tool,
+    generate_postmortem_tool,
 )
 
 mcp = FastMCP("enterprise-incident-mcp")
@@ -97,6 +98,12 @@ async def search_incidents(
     Search incidents by title, description, or service.
     """
     return await search_incidents_tool(query)
+
+
+@mcp.tool()
+async def generate_postmortem(incident_id: str) -> dict:
+    """Generate a draft postmortem for an incident using incident details and timeline."""
+    return await generate_postmortem_tool(incident_id)
 
 
 if __name__ == "__main__":

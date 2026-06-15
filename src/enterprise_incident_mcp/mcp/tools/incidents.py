@@ -6,6 +6,7 @@ from enterprise_incident_mcp.repositories.incident_event_repository import (
     IncidentEventRepository,
 )
 from enterprise_incident_mcp.domain.incidents.exceptions import InvalidStatusTransition
+from enterprise_incident_mcp.services.postmortem_service import PostmortemService
 
 async def create_incident_tool(
     title: str,
@@ -184,3 +185,32 @@ async def search_incidents_tool(
             serialize_incident(incident)
             for incident in incidents
         ]
+    
+
+async def generate_postmortem_tool(incident_id: str) -> dict:
+    async with AsyncSessionLocal() as session:
+        incident_repository = IncidentRepository(session)
+        event_repository = IncidentEventRepository(session)
+
+        incident = await incident_repository.get_by_id(incident_id)
+
+        if incident is None:
+            return {
+                "error": "incident_not_found",
+                "incident_id": incident_id,
+            }
+
+        timeline = await event_repository.get_timeline(incident_id)
+
+        postmortem_service = PostmortemService()
+        markdown = postmortem_service.generate(
+            incident=incident,
+            timeline=timeline,
+        )
+
+        return {
+            "incident_id": incident_id,
+            "format": "markdown",
+            "postmortem": markdown,
+        }
+    
