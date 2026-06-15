@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import or_, select
 
 from enterprise_incident_mcp.domain.incidents.models import Incident
 from datetime import datetime
@@ -52,4 +53,23 @@ class IncidentRepository:
         await self.session.refresh(incident)
 
         return incident
+    
+    async def search(self, query: str):
+        pattern = f"%{query}%"
+
+        stmt = (
+            select(Incident)
+            .where(
+                or_(
+                    Incident.title.ilike(pattern),
+                    Incident.description.ilike(pattern),
+                    Incident.service.ilike(pattern),
+                )
+            )
+            .order_by(Incident.created_at.desc())
+        )
+
+        result = await self.session.execute(stmt)
+
+        return list(result.scalars().all())
     

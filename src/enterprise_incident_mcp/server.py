@@ -9,6 +9,7 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
     list_incidents_tool,
     update_incident_tool,
     get_incident_timeline_tool,
+    search_incidents_tool,
 )
 
 mcp = FastMCP("enterprise-incident-mcp")
@@ -86,6 +87,16 @@ async def assign_incident(incident_id: str, owner: str) -> dict:
 async def get_incident_timeline(incident_id: str) -> list[dict]:
     """Get timeline events for an incident."""
     return await get_incident_timeline_tool(incident_id)
+
+
+@mcp.tool()
+async def search_incidents(
+    query: str,
+) -> list[dict]:
+    """
+    Search incidents by title, description, or service.
+    """
+    return await search_incidents_tool(query)
 
 
 if __name__ == "__main__":

@@ -119,3 +119,10 @@ class IncidentService:
         )
 
         await self.event_repository.create(event)
+
+    
+    async def search_incidents(
+        self,
+        query: str,
+    ):
+        return await self.repository.search(query)

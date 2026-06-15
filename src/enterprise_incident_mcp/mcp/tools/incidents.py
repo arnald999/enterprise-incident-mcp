@@ -160,3 +160,20 @@ async def get_incident_timeline_tool(incident_id: str) -> list[dict]:
             }
             for event in events
         ]
+    
+async def search_incidents_tool(
+    query: str,
+) -> list[dict]:
+
+    async with AsyncSessionLocal() as session:
+
+        repository = IncidentRepository(session)
+
+        service_layer = IncidentService(repository)
+
+        incidents = await service_layer.search_incidents(query)
+
+        return [
+            serialize_incident(incident)
+            for incident in incidents
+        ]
