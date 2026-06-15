@@ -8,6 +8,7 @@ from alembic import context
 
 from enterprise_incident_mcp.db.base import Base
 from enterprise_incident_mcp.domain.incidents.models import Incident
+from enterprise_incident_mcp.domain.incidents.event_models import IncidentEvent
 
 config = context.config
 
