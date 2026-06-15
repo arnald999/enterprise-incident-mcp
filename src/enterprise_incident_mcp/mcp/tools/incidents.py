@@ -2,7 +2,9 @@ from enterprise_incident_mcp.db.session import AsyncSessionLocal
 from enterprise_incident_mcp.domain.incidents.schemas import IncidentCreate
 from enterprise_incident_mcp.repositories.incident_repository import IncidentRepository
 from enterprise_incident_mcp.services.incident_service import IncidentService
-
+from enterprise_incident_mcp.repositories.incident_event_repository import (
+    IncidentEventRepository,
+)
 
 async def create_incident_tool(
     title: str,
@@ -13,7 +15,8 @@ async def create_incident_tool(
 ) -> dict:
     async with AsyncSessionLocal() as session:
         repository = IncidentRepository(session)
-        service_layer = IncidentService(repository)
+        event_repository = IncidentEventRepository(session)
+        service_layer = IncidentService(repository, event_repository)
 
         incident = await service_layer.create_incident(
             IncidentCreate(
@@ -41,7 +44,8 @@ async def create_incident_tool(
 async def list_incidents_tool() -> list[dict]:
     async with AsyncSessionLocal() as session:
         repository = IncidentRepository(session)
-        service_layer = IncidentService(repository)
+        event_repository = IncidentEventRepository(session)
+        service_layer = IncidentService(repository, event_repository)
 
         incidents = await service_layer.list_incidents()
 
@@ -78,7 +82,8 @@ def serialize_incident(incident) -> dict:
 async def get_incident_tool(incident_id: str) -> dict:
     async with AsyncSessionLocal() as session:
         repository = IncidentRepository(session)
-        service_layer = IncidentService(repository)
+        event_repository = IncidentEventRepository(session)
+        service_layer = IncidentService(repository, event_repository)
 
         incident = await service_layer.get_incident(incident_id)
 
@@ -99,7 +104,8 @@ async def update_incident_tool(
 ) -> dict:
     async with AsyncSessionLocal() as session:
         repository = IncidentRepository(session)
-        service_layer = IncidentService(repository)
+        event_repository = IncidentEventRepository(session)
+        service_layer = IncidentService(repository, event_repository)
 
         try:
             incident = await service_layer.update_incident(
@@ -120,7 +126,19 @@ async def assign_incident_tool(
     incident_id: str,
     owner: str,
 ) -> dict:
-    return await update_incident_tool(
-        incident_id=incident_id,
-        owner=owner,
-    )
+    async with AsyncSessionLocal() as session:
+        repository = IncidentRepository(session)
+        event_repository = IncidentEventRepository(session)
+        service_layer = IncidentService(repository, event_repository)
+
+        try:
+            incident = await service_layer.assign_incident(
+                incident_id=incident_id,
+                owner=owner,
+            )
+            return serialize_incident(incident)
+        except ValueError:
+            return {
+                "error": "incident_not_found",
+                "incident_id": incident_id,
+            }

@@ -1,14 +1,27 @@
 from datetime import datetime
 from uuid import uuid4
 
+from datetime import datetime
+from enterprise_incident_mcp.domain.incidents.event_models import (
+    IncidentEvent,
+    IncidentEventType,
+)
+from enterprise_incident_mcp.repositories.incident_event_repository import (
+    IncidentEventRepository,
+)
 from enterprise_incident_mcp.domain.incidents.models import Incident, IncidentStatus
 from enterprise_incident_mcp.domain.incidents.schemas import IncidentCreate
 from enterprise_incident_mcp.repositories.incident_repository import IncidentRepository
 
 
 class IncidentService:
-    def __init__(self, repository: IncidentRepository):
+    def __init__(
+        self,
+        repository: IncidentRepository,
+        event_repository: IncidentEventRepository | None = None,
+    ):
         self.repository = repository
+        self.event_repository = event_repository
 
     async def create_incident(self, payload: IncidentCreate) -> Incident:
         now = datetime.utcnow()
@@ -25,7 +38,14 @@ class IncidentService:
             updated_at=now,
         )
 
-        return await self.repository.create(incident)
+        created_incident = await self.repository.create(incident)
+        await self._record_event(
+            incident_id=created_incident.id,
+            event_type=IncidentEventType.INCIDENT_CREATED,
+            message=f"Incident created with severity {created_incident.severity}",
+        )
+
+        return created_incident
 
     async def list_incidents(self) -> list[Incident]:
         return await self.repository.list_all()
@@ -49,6 +69,15 @@ class IncidentService:
 
         if incident is None:
             raise ValueError(f"Incident not found: {incident_id}")
+        
+        await self._record_event(
+            incident_id=incident.id,
+            event_type=IncidentEventType.INCIDENT_UPDATED,
+            message=(
+                f"Incident updated. "
+                f"status={incident.status}, severity={incident.severity}, owner={incident.owner}"
+            ),
+        )
 
         return incident
 
@@ -57,7 +86,36 @@ class IncidentService:
         incident_id: str,
         owner: str,
     ) -> Incident:
-        return await self.update_incident(
+        incident = await self.repository.update(
             incident_id=incident_id,
             owner=owner,
         )
+
+        if incident is None:
+            raise ValueError(f"Incident not found: {incident_id}")
+
+        await self._record_event(
+            incident_id=incident.id,
+            event_type=IncidentEventType.INCIDENT_ASSIGNED,
+            message=f"Incident assigned to {owner}",
+        )
+
+        return incident
+    
+    async def _record_event(
+        self,
+        incident_id: str,
+        event_type: IncidentEventType,
+        message: str,
+    ) -> None:
+        if self.event_repository is None:
+            return
+
+        event = IncidentEvent(
+            incident_id=incident_id,
+            event_type=event_type,
+            message=message,
+            created_at=datetime.utcnow(),
+        )
+
+        await self.event_repository.create(event)
