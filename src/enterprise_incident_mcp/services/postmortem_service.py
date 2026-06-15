@@ -8,51 +8,72 @@ class PostmortemService:
         incident: Incident,
         timeline: list[IncidentEvent],
     ) -> str:
-        timeline_lines = "\n".join(
-            f"- {event.created_at.isoformat()} - {event.event_type}: {event.message}"
-            for event in timeline
+        timeline_text = self._timeline_summary(
+            timeline
         )
+        impact = (
+                    f"Service '{incident.service}' experienced a "
+                    f"{incident.severity} severity incident."
+                )
+        
+        resolution = (
+                    "Incident status is currently "
+                    f"{incident.status}."
+                )
 
         return f"""# Postmortem: {incident.title}
 
-## Incident Summary
+                ## Incident Summary
 
-Incident ID: {incident.id}
+                Incident ID: {incident.id}
 
-Service: {incident.service or "Unknown"}
+                Service: {incident.service or "Unknown"}
 
-Severity: {incident.severity}
+                Severity: {incident.severity}
 
-Final Status: {incident.status}
+                Final Status: {incident.status}
 
-Owner: {incident.owner or "Unassigned"}
+                Owner: {incident.owner or "Unassigned"}
 
-## Impact
+                ## Impact
 
-Describe customer impact here.
+                {impact}
 
-## Timeline
+                ## Timeline
 
-{timeline_lines or "No timeline events recorded."}
+                {timeline_text}
 
-## Root Cause
+                ## Root Cause
 
-Root cause is not yet determined.
+                Root cause is not yet determined.
 
-## Resolution
+                ## Resolution
 
-Describe mitigation and recovery steps here.
+                {resolution}
 
-## What Went Well
+                ## What Went Well
 
-- Timeline events were captured.
-- Incident ownership was tracked.
+                - Timeline events were captured.
+                - Incident ownership was tracked.
 
-## What Went Wrong
+                ## What Went Wrong
 
-- Add investigation findings here.
+                - Add investigation findings here.
 
-## Action Items
+                ## Action Items
 
-- Add follow-up action items here.
-"""
+                - Add follow-up action items here.
+                """
+    
+    
+    def _timeline_summary(
+        self,
+        timeline: list[IncidentEvent],
+    ) -> str:
+        if not timeline:
+            return "No timeline events recorded."
+
+        return "\n".join(
+            f"- {event.created_at.isoformat()} | {event.message}"
+            for event in timeline
+        )
