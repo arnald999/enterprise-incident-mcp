@@ -245,4 +245,38 @@ async def build_incident_context_tool(query: str) -> dict:
             "incident_count": len(incidents),
             "context": context,
         }
+
+async def generate_incident_rca_tool(query: str) -> dict:
+    async with AsyncSessionLocal() as session:
+        incident_repository = IncidentRepository(session)
+        event_repository = IncidentEventRepository(session)
+
+        incidents = await incident_repository.find_similar(query)
+
+        timelines = {}
+
+        for incident in incidents:
+            timelines[incident.id] = await event_repository.get_timeline(
+                incident.id
+            )
+
+        rag_service = RAGService()
+
+        context = rag_service.build_context(
+            incidents=incidents,
+            timelines=timelines,
+        )
+
+        rca = rag_service.generate_rca(
+            query=query,
+            context=context,
+            incident_count=len(incidents),
+        )
+
+        return {
+            "query": query,
+            "incident_count": len(incidents),
+            "format": "markdown",
+            "rca": rca,
+        }
     

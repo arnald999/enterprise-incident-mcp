@@ -13,6 +13,7 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
     find_similar_incidents_tool,
     generate_postmortem_tool,
     build_incident_context_tool,
+    generate_incident_rca_tool,
 )
 from enterprise_incident_mcp.mcp.tools.jira import (
     create_jira_ticket_tool,
@@ -148,6 +149,12 @@ async def create_github_issue(
 async def build_incident_context(query: str) -> dict:
     """Build incident context for RAG workflows using similar incidents and timelines."""
     return await build_incident_context_tool(query)
+
+
+@mcp.tool()
+async def generate_incident_rca(query: str) -> dict:
+    """Generate an RCA draft using similar incidents and timelines."""
+    return await generate_incident_rca_tool(query)
 
 
 if __name__ == "__main__":
