@@ -10,6 +10,7 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
     update_incident_tool,
     get_incident_timeline_tool,
     search_incidents_tool,
+    find_similar_incidents_tool,
     generate_postmortem_tool,
 )
 from enterprise_incident_mcp.mcp.tools.jira import (
@@ -104,6 +105,12 @@ async def search_incidents(
     Search incidents by title, description, or service.
     """
     return await search_incidents_tool(query)
+
+
+@mcp.tool()
+async def find_similar_incidents(query: str) -> list[dict]:
+    """Find similar incidents using keyword-based retrieval."""
+    return await find_similar_incidents_tool(query)
 
 
 @mcp.tool()

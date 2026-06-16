@@ -137,3 +137,6 @@ class IncidentService:
         query: str,
     ):
         return await self.repository.search(query)
+    
+    async def find_similar_incidents(self, query: str) -> list[Incident]:
+        return await self.repository.find_similar(query)

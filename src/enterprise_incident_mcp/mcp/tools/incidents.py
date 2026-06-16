@@ -174,17 +174,21 @@ async def search_incidents_tool(
 ) -> list[dict]:
 
     async with AsyncSessionLocal() as session:
-
         repository = IncidentRepository(session)
-
         service_layer = IncidentService(repository)
-
         incidents = await service_layer.search_incidents(query)
-
         return [
             serialize_incident(incident)
             for incident in incidents
         ]
+    
+async def find_similar_incidents_tool(query: str) -> list[dict]:
+    async with AsyncSessionLocal() as session:
+        repository = IncidentRepository(session)
+        service_layer = IncidentService(repository)
+
+        incidents = await service_layer.find_similar_incidents(query)
+        return [serialize_incident(incident) for incident in incidents]
     
 
 async def generate_postmortem_tool(incident_id: str) -> dict:

@@ -73,3 +73,23 @@ class IncidentRepository:
 
         return list(result.scalars().all())
     
+    async def find_similar(self, query: str) -> list[Incident]:
+        pattern = f"%{query}%"
+
+        stmt = (
+            select(Incident)
+            .where(
+                or_(
+                    Incident.title.ilike(pattern),
+                    Incident.description.ilike(pattern),
+                    Incident.service.ilike(pattern),
+                    Incident.owner.ilike(pattern),
+                )
+            )
+            .order_by(Incident.created_at.desc())
+            .limit(10)
+        )
+
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+    
