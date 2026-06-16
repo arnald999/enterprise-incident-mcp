@@ -1,15 +1,11 @@
-from datetime import datetime
-
 from enterprise_incident_mcp.db.session import AsyncSessionLocal
-from enterprise_incident_mcp.domain.incidents.event_models import (
-    IncidentEvent,
-    IncidentEventType,
-)
+from enterprise_incident_mcp.domain.incidents.event_models import IncidentEventType
 from enterprise_incident_mcp.repositories.incident_event_repository import (
     IncidentEventRepository,
 )
 from enterprise_incident_mcp.repositories.incident_repository import IncidentRepository
 from enterprise_incident_mcp.services.github_service import GitHubService
+from enterprise_incident_mcp.services.integration_event_service import IntegrationEventService
 
 
 async def create_github_issue_tool(
@@ -19,6 +15,10 @@ async def create_github_issue_tool(
     async with AsyncSessionLocal() as session:
         incident_repository = IncidentRepository(session)
         event_repository = IncidentEventRepository(session)
+
+        integration_events = IntegrationEventService(
+            event_repository
+        )
 
         incident = await incident_repository.get_by_id(incident_id)
 
@@ -44,16 +44,13 @@ async def create_github_issue_tool(
             ),
         )
 
-        await event_repository.create(
-            IncidentEvent(
-                incident_id=incident.id,
-                event_type=IncidentEventType.GITHUB_ISSUE_CREATED,
-                message=(
-                    f"GitHub issue #{issue['issue_number']} created "
-                    f"in repository {issue['repository']}"
-                ),
-                created_at=datetime.utcnow(),
-            )
+        await integration_events.record(
+            incident_id=incident.id,
+            event_type=IncidentEventType.GITHUB_ISSUE_CREATED,
+            message=(
+                f"GitHub issue #{issue['issue_number']} created "
+                f"in repository {issue['repository']}"
+            ),
         )
 
         return issue
