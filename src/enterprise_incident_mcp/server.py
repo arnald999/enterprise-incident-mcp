@@ -15,6 +15,9 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
 from enterprise_incident_mcp.mcp.tools.jira import (
     create_jira_ticket_tool,
 )
+from enterprise_incident_mcp.mcp.tools.github import (
+    create_github_issue_tool,
+)
 
 mcp = FastMCP("enterprise-incident-mcp")
 
@@ -119,6 +122,19 @@ async def create_jira_ticket(
         incident_id=incident_id,
         project_key=project_key,
     )
+
+
+@mcp.tool()
+async def create_github_issue(
+    incident_id: str,
+    repository: str,
+) -> dict:
+    """Create GitHub issue from incident."""
+    return await create_github_issue_tool(
+        incident_id=incident_id,
+        repository=repository,
+    )
+
 
 if __name__ == "__main__":
     mcp.run()
