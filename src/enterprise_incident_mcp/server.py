@@ -21,6 +21,10 @@ from enterprise_incident_mcp.mcp.tools.jira import (
 from enterprise_incident_mcp.mcp.tools.github import (
     create_github_issue_tool,
 )
+from enterprise_incident_mcp.mcp.tools.embeddings import (
+    index_incident_tool,
+    semantic_search_tool,
+)
 
 mcp = FastMCP("enterprise-incident-mcp")
 
@@ -155,6 +159,31 @@ async def build_incident_context(query: str) -> dict:
 async def generate_incident_rca(query: str) -> dict:
     """Generate an RCA draft using similar incidents and timelines."""
     return await generate_incident_rca_tool(query)
+
+
+@mcp.tool()
+async def index_incident(
+    incident_id: str,
+) -> dict:
+    """
+    Generate and store vector embedding
+    for an incident.
+    """
+    return await index_incident_tool(
+        incident_id
+    )
+
+
+@mcp.tool()
+async def semantic_search(
+    query: str,
+) -> dict:
+    """
+    Semantic incident search using embeddings.
+    """
+    return await semantic_search_tool(
+        query
+    )
 
 
 if __name__ == "__main__":

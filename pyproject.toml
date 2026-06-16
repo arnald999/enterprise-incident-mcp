@@ -11,9 +11,11 @@ dependencies = [
     "mcp>=1.0.0",
     "opentelemetry-api>=1.42.1",
     "opentelemetry-sdk>=1.42.1",
+    "pgvector>=0.4.2",
     "pydantic>=2.8.0",
     "pydantic-settings>=2.14.1",
     "python-dotenv>=1.0.1",
+    "sentence-transformers>=5.6.0",
     "sqlalchemy>=2.0.50",
     "structlog>=26.1.0",
 ]
