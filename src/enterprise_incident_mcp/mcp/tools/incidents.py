@@ -7,6 +7,7 @@ from enterprise_incident_mcp.repositories.incident_event_repository import (
 )
 from enterprise_incident_mcp.domain.incidents.exceptions import InvalidStatusTransition
 from enterprise_incident_mcp.services.postmortem_service import PostmortemService
+from enterprise_incident_mcp.services.rag_service import RAGService
 
 async def create_incident_tool(
     title: str,
@@ -216,5 +217,32 @@ async def generate_postmortem_tool(incident_id: str) -> dict:
             "incident_id": incident_id,
             "format": "markdown",
             "postmortem": markdown,
+        }
+    
+async def build_incident_context_tool(query: str) -> dict:
+    async with AsyncSessionLocal() as session:
+        incident_repository = IncidentRepository(session)
+        event_repository = IncidentEventRepository(session)
+
+        incidents = await incident_repository.find_similar(query)
+
+        timelines = {}
+
+        for incident in incidents:
+            timelines[incident.id] = await event_repository.get_timeline(
+                incident.id
+            )
+
+        rag_service = RAGService()
+
+        context = rag_service.build_context(
+            incidents=incidents,
+            timelines=timelines,
+        )
+
+        return {
+            "query": query,
+            "incident_count": len(incidents),
+            "context": context,
         }
     

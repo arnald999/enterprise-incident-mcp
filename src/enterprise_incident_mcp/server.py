@@ -12,6 +12,7 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
     search_incidents_tool,
     find_similar_incidents_tool,
     generate_postmortem_tool,
+    build_incident_context_tool,
 )
 from enterprise_incident_mcp.mcp.tools.jira import (
     create_jira_ticket_tool,
@@ -141,6 +142,12 @@ async def create_github_issue(
         incident_id=incident_id,
         repository=repository,
     )
+
+
+@mcp.tool()
+async def build_incident_context(query: str) -> dict:
+    """Build incident context for RAG workflows using similar incidents and timelines."""
+    return await build_incident_context_tool(query)
 
 
 if __name__ == "__main__":
