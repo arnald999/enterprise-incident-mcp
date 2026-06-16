@@ -12,6 +12,9 @@ from enterprise_incident_mcp.mcp.tools.incidents import (
     search_incidents_tool,
     generate_postmortem_tool,
 )
+from enterprise_incident_mcp.mcp.tools.jira import (
+    create_jira_ticket_tool,
+)
 
 mcp = FastMCP("enterprise-incident-mcp")
 
@@ -105,6 +108,17 @@ async def generate_postmortem(incident_id: str) -> dict:
     """Generate a draft postmortem for an incident using incident details and timeline."""
     return await generate_postmortem_tool(incident_id)
 
+
+@mcp.tool()
+async def create_jira_ticket(
+    incident_id: str,
+    project_key: str = "PLAT",
+) -> dict:
+    """Create Jira ticket from incident."""
+    return await create_jira_ticket_tool(
+        incident_id=incident_id,
+        project_key=project_key,
+    )
 
 if __name__ == "__main__":
     mcp.run()
