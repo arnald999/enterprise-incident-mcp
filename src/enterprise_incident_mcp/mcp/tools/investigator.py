@@ -17,6 +17,9 @@ from enterprise_incident_mcp.services.incident_investigator_service import (
 from enterprise_incident_mcp.services.rag_service import (
     RAGService,
 )
+from enterprise_incident_mcp.services.pattern_service import (
+    PatternService,
+)
 
 
 async def investigate_incident_tool(
@@ -47,6 +50,8 @@ async def investigate_incident_tool(
         investigator = (
             IncidentInvestigatorService()
         )
+
+        pattern_service = PatternService()
 
         # Step 1: Embed query
 
@@ -114,16 +119,22 @@ async def investigate_incident_tool(
             )
         )
 
+        patterns = (
+            pattern_service.extract_patterns(
+                incidents=incidents,
+                timelines=timelines,
+            )
+        )
+
         # Step 5: Generate report
 
-        report = (
-            investigator.generate_report(
-                query=query,
-                incident_count=len(
-                    incidents
-                ),
-                context=context,
-            )
+        report = investigator.generate_report(
+            query=query,
+            incident_count=len(
+                incidents
+            ),
+            context=context,
+            patterns=patterns,
         )
 
         return {

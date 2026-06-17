@@ -4,37 +4,60 @@ class IncidentInvestigatorService:
         query: str,
         incident_count: int,
         context: str,
+        patterns: dict,
     ) -> str:
 
+        top_severity = (
+            patterns["top_severity"][0][0]
+            if patterns["top_severity"]
+            else "Unknown"
+        )
+
+        top_status = (
+            patterns["top_status"][0][0]
+            if patterns["top_status"]
+            else "Unknown"
+        )
+
+        top_service = (
+            patterns["top_service"][0][0]
+            if patterns["top_service"]
+            else "Unknown"
+        )
+
         return f"""
-# Incident Investigation Report
+    # Incident Investigation Report
 
-## Query
+    ## Query
 
-{query}
+    {query}
 
-## Similar Incidents Reviewed
+    ## Similar Incidents Reviewed
 
-{incident_count}
+    {incident_count}
 
-## Findings
+    ## Observed Patterns
 
-Historical incidents with related symptoms were identified.
+    Most common severity:
+    {top_severity}
 
-Repeated patterns indicate potential service degradation,
-dependency failures, operational bottlenecks,
-or infrastructure-related issues.
+    Most common status:
+    {top_status}
 
-## Recommended Investigation Areas
+    Most common service:
+    {top_service}
 
-- Recent deployments
-- Dependency health
-- Database performance
-- Service saturation
-- Error rate changes
-- Capacity limits
+    Jira tickets created:
+    {patterns['jira_tickets']}
 
-## Historical Context
+    GitHub issues created:
+    {patterns['github_issues']}
 
-{context}
-"""
+    ## Findings
+
+    Historical incidents indicate recurring operational patterns.
+
+    ## Historical Context
+
+    {context}
+    """
