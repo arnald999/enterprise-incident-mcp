@@ -67,10 +67,20 @@ async def investigate_incident_tool(
         # Step 3: Load incidents
 
         incidents = []
-
         timelines = {}
+        similar_matches = []
 
         for match in matches:
+
+            similar_matches.append(
+                {
+                    "incident_id": match.incident_id,
+                    "distance": round(
+                        float(match.distance),
+                        4,
+                    ),
+                }
+            )
 
             incident = (
                 await incident_repo.get_by_id(
@@ -121,5 +131,7 @@ async def investigate_incident_tool(
             "incident_count": len(
                 incidents
             ),
+            "similar_incidents":
+                similar_matches,
             "report": report,
         }
