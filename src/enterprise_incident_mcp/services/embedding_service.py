@@ -2,16 +2,18 @@ from sentence_transformers import SentenceTransformer
 
 
 class EmbeddingService:
-    def __init__(self):
-        self.model = SentenceTransformer(
-            "all-MiniLM-L6-v2"
-        )
+    _model: SentenceTransformer | None = None
 
-    def embed(
-        self,
-        text: str,
-    ) -> list[float]:
-        return self.model.encode(
+    @classmethod
+    def _get_model(cls) -> SentenceTransformer:
+        if cls._model is None:
+            cls._model = SentenceTransformer("all-MiniLM-L6-v2")
+        return cls._model
+
+    def embed(self, text: str) -> list[float]:
+        model = self._get_model()
+
+        return model.encode(
             text,
             normalize_embeddings=True,
         ).tolist()
