@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-incident-mcp
+  namespace: enterprise-incident
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: enterprise-incident-mcp
+  template:
+    metadata:
+      labels:
+        app: enterprise-incident-mcp
+    spec:
+      containers:
+        - name: enterprise-incident-mcp
+          image: enterprise-incident-mcp:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONPATH
+              value: /app/src
+          envFrom:
+            - secretRef:
+                name: mcp-secret
