@@ -11,5 +11,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mcp-server:
+    image: enterprise-incident-mcp:latest
+    container_name: enterprise-incident-mcp
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql+asyncpg://incident_user:incident_password@postgres:5432/incident_db
+      PYTHONPATH: /app/src
+    restart: unless-stopped
+
 volumes:
   postgres_data:

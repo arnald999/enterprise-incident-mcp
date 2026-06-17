@@ -36,7 +36,9 @@ mcp = FastMCP("enterprise-incident-mcp")
 def health():
     return {
         "status": "healthy",
-        "service": "enterprise-incident-mcp",
+        "database": "connected",
+        "embeddings": "loaded",
+        "version": "1.0.0"
     }
 
 
