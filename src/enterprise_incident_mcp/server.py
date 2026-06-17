@@ -25,6 +25,9 @@ from enterprise_incident_mcp.mcp.tools.embeddings import (
     index_incident_tool,
     semantic_search_tool,
 )
+from enterprise_incident_mcp.mcp.tools.investigator import (
+    investigate_incident_tool,
+)
 
 mcp = FastMCP("enterprise-incident-mcp")
 
@@ -182,6 +185,15 @@ async def semantic_search(
     Semantic incident search using embeddings.
     """
     return await semantic_search_tool(
+        query
+    )
+
+
+@mcp.tool()
+async def investigate_incident(
+    query: str,
+) -> dict:
+    return await investigate_incident_tool(
         query
     )
 
