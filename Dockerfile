@@ -19,4 +19,5 @@ COPY src ./src
 COPY alembic ./alembic
 COPY alembic.ini ./
 
-CMD ["uv", "run", "python", "-m", "enterprise_incident_mcp.web_server"]
+# CMD ["uv", "run", "python", "-m", "enterprise_incident_mcp.web_server"]
+CMD ["sh", "-c", "uv run uvicorn enterprise_incident_mcp.web_server:app --host 0.0.0.0 --port ${PORT:-8000}"]
