@@ -37,20 +37,6 @@ async def health():
     }
 
 
-@app.get("/debug/db")
-async def debug_db():
-    database_url = os.getenv("DATABASE_URL", "")
-
-    safe_url = database_url
-    if "@" in safe_url:
-        prefix, suffix = safe_url.split("@", 1)
-        safe_url = "***@" + suffix
-
-    return {
-        "database_url": safe_url,
-    }
-
-
 app.mount("/", mcp.streamable_http_app())
 
 
