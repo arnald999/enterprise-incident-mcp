@@ -1,4 +1,5 @@
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 from enterprise_incident_mcp.mcp.resources.system import (
     database_health,
 )
@@ -29,7 +30,12 @@ from enterprise_incident_mcp.mcp.tools.investigator import (
     investigate_incident_tool,
 )
 
-mcp = FastMCP("enterprise-incident-mcp")
+mcp = FastMCP(
+    "enterprise-incident-mcp",
+    transport_security=TransportSecuritySettings(
+        enable_dns_rebinding_protection=False,
+    ),
+)
 
 
 @mcp.resource("system://health")
