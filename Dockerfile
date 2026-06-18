@@ -4,6 +4,7 @@ WORKDIR /app
 
 ENV PYTHONPATH=/app/src
 ENV PYTHONUNBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -19,4 +20,4 @@ COPY src ./src
 COPY alembic ./alembic
 COPY alembic.ini ./
 
-CMD ["sh", "-c", "uv run python -m enterprise_incident_mcp.web_server"]
+CMD ["python", "-m", "enterprise_incident_mcp.web_server"]
