@@ -20,4 +20,4 @@ COPY src ./src
 COPY alembic ./alembic
 COPY alembic.ini ./
 
-CMD ["python", "-m", "enterprise_incident_mcp.web_server"]
+CMD ["sh", "-c", "echo STARTING_RENDER_APP && python --version && which python && python -m enterprise_incident_mcp.web_server"]
