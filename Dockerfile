@@ -19,4 +19,4 @@ COPY src ./src
 COPY alembic ./alembic
 COPY alembic.ini ./
 
-CMD ["uv", "run", "python", "-m", "enterprise_incident_mcp.web_server"]
+CMD ["sh", "-c", "uv run python -m enterprise_incident_mcp.web_server"]
